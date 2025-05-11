@@ -1,4 +1,5 @@
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import './polyfills'; // Import this first before any other imports
 import './shims';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { Web3Provider } from './src/contexts/Web3Context';

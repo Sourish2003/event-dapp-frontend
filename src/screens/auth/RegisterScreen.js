@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Loading from '../../components/common/Loading';
 import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterScreen = () => {
-  const { registerUser, isLoading } = useAuth();
+  const { register, isLoading } = useAuth();
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState({});
@@ -30,7 +30,7 @@ const RegisterScreen = () => {
     if (!validate()) return;
     
     try {
-      const success = await registerUser(userName, email);
+      const success = await register({ name: userName, email });
       if (!success) {
         setErrors({ general: 'Failed to register. Please try again.' });
       }
