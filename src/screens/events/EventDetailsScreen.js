@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, SafeAreaView, Alert, Image } from 'react-native';
-import { useWeb3 } from '../../contexts/Web3Context';
-import { getEventCoreContract } from '../../config/blockchainConfig';
-import { getEventMetadata, isEventFavorite, favoriteEvent, unfavoriteEvent, buyTickets } from '../../services/ethereum/contracts';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Button from '../../components/common/Button';
 import Loading from '../../components/common/Loading';
 import EventDetails from '../../components/events/EventDetails';
-import { ethers } from 'ethers';
+import { useWeb3 } from '../../contexts/Web3Context';
+import { MOCK_EVENTS, mockApiCall } from '../../services/mockData';
 
 const EventDetailsScreen = ({ route, navigation }) => {
   const { eventId } = route.params;
-  const { contracts, walletAddress, ethSigner } = useWeb3();
+  const { walletAddress } = useWeb3();
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -19,50 +17,29 @@ const EventDetailsScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     loadEventDetails();
-  }, [eventId, contracts]);
+  }, [eventId]);
 
   const loadEventDetails = async () => {
-    if (!contracts || !eventId) return;
-
     try {
       setLoading(true);
-      // Get event contract address
-      const eventAddress = await contracts.eventFactory.getEventContract(eventId);
       
-      if (!eventAddress || eventAddress === ethers.constants.AddressZero) {
+      // Simulate API call delay
+      await mockApiCall(null, 800);
+      
+      // Find event in mock data
+      const foundEvent = MOCK_EVENTS.find(e => e.id === eventId);
+      
+      if (!foundEvent) {
         Alert.alert('Error', 'Event not found');
         navigation.goBack();
         return;
       }
 
-      // Get event core contract
-      const eventCoreContract = getEventCoreContract(eventAddress, ethSigner);
+      // Set random favorite status
+      setIsFavorite(Math.random() > 0.5);
       
-      // Get event details
-      const details = await eventCoreContract.getEventDetails();
-      
-      // Get event metadata
-      const metadata = await getEventMetadata(contracts.eventDiscovery, eventId);
-      
-      // Check if event is favorited
-      const favStatus = await isEventFavorite(contracts.userTicketHub, walletAddress, eventId);
-      setIsFavorite(favStatus);
-
-      setEvent({
-        id: eventId,
-        name: details._name,
-        date: details._date.toString(),
-        price: ethers.utils.formatEther(details._price.toString()),
-        ticketCount: details._ticketCount.toString(),
-        ticketRemain: details._ticketRemain.toString(),
-        organizer: details._organizer,
-        category: metadata.category,
-        location: metadata.location,
-        description: metadata.description,
-        imageUrl: `https://ipfs.io/ipfs/${metadata.imageHash}`,
-        isFeatured: metadata.isFeatured,
-        popularity: metadata.popularity,
-      });
+      // Set event data
+      setEvent(foundEvent);
     } catch (error) {
       console.error('Error loading event details:', error);
       Alert.alert('Error', 'Failed to load event details');
@@ -73,11 +50,7 @@ const EventDetailsScreen = ({ route, navigation }) => {
 
   const handleFavoriteToggle = async () => {
     try {
-      if (isFavorite) {
-        await unfavoriteEvent(contracts.userTicketHub, eventId);
-      } else {
-        await favoriteEvent(contracts.userTicketHub, eventId);
-      }
+      // Just toggle the state for UI mockup
       setIsFavorite(!isFavorite);
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -86,18 +59,13 @@ const EventDetailsScreen = ({ route, navigation }) => {
   };
 
   const handleBuyTickets = async () => {
-    if (!event || !contracts) return;
+    if (!event) return;
     
     try {
       setPurchaseLoading(true);
       
-      // Call the buyTickets function with the event price
-      await buyTickets(
-        contracts.userTicketHub, 
-        eventId, 
-        ticketQuantity, 
-        event.price
-      );
+      // Simulate API call delay
+      await mockApiCall(null, 1500);
       
       Alert.alert(
         'Success', 

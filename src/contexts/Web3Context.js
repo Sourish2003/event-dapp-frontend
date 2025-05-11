@@ -4,11 +4,17 @@ import { Alert } from 'react-native';
 
 const Web3Context = createContext();
 
-// Mock wallet address for development
+// Mock wallet address and contracts for development
 const MOCK_WALLET_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+const MOCK_CONTRACTS = {
+  userTicketHub: {},
+  eventFactory: {},
+  eventDiscovery: {},
+};
 
 export const Web3Provider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [contracts, setContracts] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,8 +31,9 @@ export const Web3Provider = ({ children }) => {
       const walletInfo = await AsyncStorage.getItem('walletInfo');
       
       if (walletInfo) {
-        // Set mock wallet address
+        // Set mock wallet address and contracts
         setWalletAddress(MOCK_WALLET_ADDRESS);
+        setContracts(MOCK_CONTRACTS);
         setIsConnected(true);
       }
     } catch (error) {
@@ -42,6 +49,7 @@ export const Web3Provider = ({ children }) => {
       const mockWalletInfo = { address: MOCK_WALLET_ADDRESS };
       await AsyncStorage.setItem('walletInfo', JSON.stringify(mockWalletInfo));
       setWalletAddress(MOCK_WALLET_ADDRESS);
+      setContracts(MOCK_CONTRACTS);
       setIsConnected(true);
       return true;
     } catch (error) {
@@ -55,6 +63,7 @@ export const Web3Provider = ({ children }) => {
     try {
       await AsyncStorage.removeItem('walletInfo');
       setWalletAddress(null);
+      setContracts(null);
       setIsConnected(false);
       return true;
     } catch (error) {
@@ -67,6 +76,7 @@ export const Web3Provider = ({ children }) => {
   // Simplified context value with only necessary mock data
   const value = {
     walletAddress,
+    contracts,
     isConnected,
     isLoading,
     connectWallet,

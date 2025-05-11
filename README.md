@@ -1,6 +1,56 @@
-# Welcome to your Expo app 👋
+# Event DApp Frontend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile application for event ticketing using blockchain technology.
+
+## Overview
+
+This application provides a user interface for an event ticketing system, with features including:
+
+- View events by category
+- Purchase tickets
+- Transfer tickets
+- Favorite events
+
+## Mock Data Implementation
+
+For rapid UI development and testing, this project uses mock data to simulate blockchain interactions. The mock data is stored in `src/services/mockData.js`.
+
+## Project Structure
+
+- `/src/components` - Reusable UI components
+- `/src/contexts` - React context providers
+- `/src/navigation` - App navigation structure
+- `/src/screens` - App screens organized by feature
+- `/src/services` - Mock services and API integrations
+
+## Setup and Running
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+
+   ```bash
+   npm start
+   ```
+
+3. Use Expo Go app to scan the QR code or run on emulators.
+
+## Recent Optimizations
+
+1. Replaced blockchain calls with mock data services for UI development
+2. Fixed navigation issues and loading screens
+3. Consolidated duplicate code and removed unused files
+4. Implemented profile registration with local storage
+
+## Next Steps
+
+- Implement real blockchain integration with proper error handling
+- Add unit tests
+- Improve UI/UX with animations and transitions
 
 ## Get started
 

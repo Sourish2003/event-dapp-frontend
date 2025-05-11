@@ -1,33 +1,22 @@
-import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  SafeAreaView, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  Alert 
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useWeb3 } from '../../contexts/Web3Context';
-import { createEvent } from '../../services/ethereum/contracts';
+import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
+} from 'react-native';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Loading from '../../components/common/Loading';
-
-const categories = [
-  { id: 0, name: 'Music' },
-  { id: 1, name: 'Sports' },
-  { id: 2, name: 'Arts' },
-  { id: 3, name: 'Technology' },
-  { id: 4, name: 'Business' },
-  { id: 5, name: 'Other' },
-];
+import { EVENT_CATEGORIES, mockApiCall } from '../../services/mockData';
 
 const CreateEventScreen = ({ navigation }) => {
-  const { contracts } = useWeb3();
   const [loading, setLoading] = useState(false);
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState(new Date());
@@ -80,28 +69,8 @@ const CreateEventScreen = ({ navigation }) => {
     try {
       setLoading(true);
       
-      // Combine date and time
-      const combinedDate = new Date(eventDate);
-      combinedDate.setHours(eventTime.getHours(), eventTime.getMinutes());
-      const timestamp = Math.floor(combinedDate.getTime() / 1000); // Convert to Unix timestamp
-      
-      // Create the event on the blockchain
-      const eventId = await createEvent(
-        contracts.eventFactory,
-        eventName,
-        timestamp,
-        price,
-        parseInt(ticketCount)
-      );
-      
-      // Add metadata to the event
-      await contracts.eventDiscovery.addEventMetadata(
-        eventId,
-        category,
-        location,
-        description,
-        imageHash || 'QmdefaultImageHash' // Use default if not provided
-      );
+      // Simulate API call delay
+      await mockApiCall(null, 1500);
       
       Alert.alert(
         'Success',
@@ -118,7 +87,6 @@ const CreateEventScreen = ({ navigation }) => {
 
   const handleUploadImage = async () => {
     // In a real app, this would connect to IPFS or similar
-    // For now, we'll just set a dummy hash
     setImageHash('QmexampleImageHash');
     Alert.alert('Success', 'Image uploaded successfully');
   };
@@ -202,7 +170,7 @@ const CreateEventScreen = ({ navigation }) => {
                   selectedValue={category}
                   onValueChange={(itemValue) => setCategory(itemValue)}
                 >
-                  {categories.map((cat) => (
+                  {EVENT_CATEGORIES.map((cat) => (
                     <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
                   ))}
                 </Picker>
@@ -250,19 +218,23 @@ const CreateEventScreen = ({ navigation }) => {
             <View style={styles.imageSection}>
               <Text style={styles.label}>Event Image</Text>
               <Button 
-                title={imageHash ? "Change Image" : "Upload Image"} 
+                title="Upload Image" 
                 onPress={handleUploadImage}
                 variant="secondary"
               />
               {imageHash && (
-                <Text style={styles.imageHash}>
-                  Image uploaded: {imageHash.substring(0, 10)}...
-                </Text>
+                <Text style={styles.imageText}>Image uploaded</Text>
               )}
             </View>
             
             <View style={styles.buttonContainer}>
               <Button title="Create Event" onPress={handleCreateEvent} />
+              <Button 
+                title="Cancel" 
+                onPress={() => navigation.goBack()} 
+                variant="secondary"
+                style={styles.cancelButton}
+              />
             </View>
           </View>
         </ScrollView>
@@ -291,23 +263,22 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
   },
-  dateContainer: {
-    marginBottom: 16,
-  },
   label: {
     fontSize: 16,
     marginBottom: 8,
     fontWeight: '500',
-    color: '#333',
+  },
+  dateContainer: {
+    marginBottom: 16,
   },
   pickerContainer: {
     marginBottom: 16,
   },
   picker: {
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#CCCCCC',
     borderRadius: 8,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F9F9F9',
   },
   textArea: {
     height: 100,
@@ -315,17 +286,18 @@ const styles = StyleSheet.create({
   imageSection: {
     marginBottom: 16,
   },
-  imageHash: {
+  imageText: {
     marginTop: 8,
-    color: '#666',
+    color: 'green',
   },
   buttonContainer: {
-    marginTop: 24,
-    marginBottom: 40,
+    marginVertical: 24,
+  },
+  cancelButton: {
+    marginTop: 12,
   },
   errorText: {
     color: '#FF3B30',
-    fontSize: 14,
     marginTop: 4,
   },
 });

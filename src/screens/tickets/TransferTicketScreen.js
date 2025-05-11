@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  Alert 
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
-import { useWeb3 } from '../../contexts/Web3Context';
-import { transferTickets } from '../../services/ethereum/contracts';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Loading from '../../components/common/Loading';
-import { ethers } from 'ethers';
+import { mockApiCall } from '../../services/mockData';
 
 const TransferTicketScreen = ({ route, navigation }) => {
   const { eventId, ticketCount, eventName } = route.params;
-  const { contracts } = useWeb3();
   const [loading, setLoading] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState('');
   const [quantity, setQuantity] = useState('1');
@@ -29,8 +26,8 @@ const TransferTicketScreen = ({ route, navigation }) => {
     // Validate recipient address
     if (!recipientAddress.trim()) {
       newErrors.recipientAddress = 'Recipient address is required';
-    } else if (!ethers.utils.isAddress(recipientAddress)) {
-      newErrors.recipientAddress = 'Invalid Ethereum address';
+    } else if (!recipientAddress.startsWith('0x') || recipientAddress.length !== 42) {
+      newErrors.recipientAddress = 'Invalid wallet address';
     }
     
     // Validate quantity
@@ -53,13 +50,8 @@ const TransferTicketScreen = ({ route, navigation }) => {
     try {
       setLoading(true);
       
-      // Transfer tickets
-      await transferTickets(
-        contracts.userTicketHub,
-        eventId,
-        recipientAddress,
-        parseInt(quantity)
-      );
+      // Simulate API call delay
+      await mockApiCall(null, 1500);
       
       Alert.alert(
         'Success',

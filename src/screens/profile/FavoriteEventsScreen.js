@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, SafeAreaView, Text } from 'react-native';
-import { useWeb3 } from '../../contexts/Web3Context';
-import { getEventCoreContract } from '../../config/blockchainConfig';
-import EventCard from '../../components/events/EventCard';
+import React, { useEffect, useState } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import Loading from '../../components/common/Loading';
-import { ethers } from 'ethers';
-import { getEventMetadata, isEventFavorite, unfavoriteEvent } from '../../services/ethereum/contracts';
+import EventCard from '../../components/events/EventCard';
+import { useWeb3 } from '../../contexts/Web3Context';
+import { MOCK_FAVORITE_EVENTS, mockApiCall } from '../../services/mockData';
 
 const FavoriteEventsScreen = ({ navigation }) => {
-  const { contracts, walletAddress, ethSigner } = useWeb3();
+  const { walletAddress } = useWeb3();
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
     loadFavoriteEvents();
-  }, [contracts, walletAddress]);
+  }, [walletAddress]);
 
   // Load events when focusing the screen
   useEffect(() => {
@@ -25,71 +23,14 @@ const FavoriteEventsScreen = ({ navigation }) => {
   }, [navigation]);
 
   const loadFavoriteEvents = async () => {
-    if (!contracts || !walletAddress) return;
-    
     try {
       setLoading(true);
       
-      // Get all events from the factory
-      const eventCount = await contracts.eventFactory.nextEventId();
-      const eventIds = Array.from({ length: eventCount.toNumber() }, (_, i) => i);
+      // Simulate API call delay
+      await mockApiCall(null, 800);
       
-      // Get favorited status for each event
-      const favoritePromises = eventIds.map(async (id) => {
-        try {
-          const isFav = await isEventFavorite(contracts.userTicketHub, walletAddress, id);
-          return { id, isFavorite: isFav };
-        } catch (error) {
-          console.error(`Error checking favorite status for event ${id}:`, error);
-          return { id, isFavorite: false };
-        }
-      });
-      
-      const favoriteStatuses = await Promise.all(favoritePromises);
-      const favoriteEventIds = favoriteStatuses
-        .filter(status => status.isFavorite)
-        .map(status => status.id);
-      
-      // Get details for favorited events
-      const eventsData = await Promise.all(
-        favoriteEventIds.map(async (id) => {
-          try {
-            const eventAddress = await contracts.eventFactory.getEventContract(id);
-            
-            if (!eventAddress || eventAddress === ethers.constants.AddressZero) {
-              return null;
-            }
-            
-            // Get event core details
-            const eventCoreContract = getEventCoreContract(eventAddress, ethSigner);
-            const eventDetails = await eventCoreContract.getEventDetails();
-            
-            // Get event metadata
-            const metadata = await getEventMetadata(contracts.eventDiscovery, id);
-            
-            return {
-              id,
-              name: eventDetails._name,
-              date: eventDetails._date.toString(),
-              price: ethers.utils.formatEther(eventDetails._price.toString()),
-              ticketCount: eventDetails._ticketCount.toString(),
-              ticketRemain: eventDetails._ticketRemain.toString(),
-              organizer: eventDetails._organizer,
-              category: metadata.category,
-              location: metadata.location,
-              description: metadata.description,
-              imageUrl: `https://ipfs.io/ipfs/${metadata.imageHash}`,
-              isFavorite: true,
-            };
-          } catch (error) {
-            console.error(`Error loading event ${id}:`, error);
-            return null;
-          }
-        })
-      );
-      
-      // Filter out null events (errors)
-      setEvents(eventsData.filter(e => e !== null));
+      // Use mock favorite events
+      setEvents(MOCK_FAVORITE_EVENTS);
     } catch (error) {
       console.error('Error loading favorite events:', error);
     } finally {
@@ -103,9 +44,7 @@ const FavoriteEventsScreen = ({ navigation }) => {
 
   const handleUnfavorite = async (eventId) => {
     try {
-      await unfavoriteEvent(contracts.userTicketHub, eventId);
-      
-      // Update events list
+      // Update events list by removing the unfavorited event
       setEvents(events.filter(event => event.id !== eventId));
     } catch (error) {
       console.error('Error unfavoriting event:', error);

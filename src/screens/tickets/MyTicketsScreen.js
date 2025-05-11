@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, SafeAreaView, Text } from 'react-native';
-import { useWeb3 } from '../../contexts/Web3Context';
-import { getUserTickets } from '../../services/ethereum/contracts';
-import TicketCard from '../../components/tickets/TicketCard';
+import React, { useEffect, useState } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import Loading from '../../components/common/Loading';
-import { getEventCoreContract } from '../../config/blockchainConfig';
-import { ethers } from 'ethers';
+import TicketCard from '../../components/tickets/TicketCard';
+import { useWeb3 } from '../../contexts/Web3Context';
+import { MOCK_USER_TICKETS, mockApiCall } from '../../services/mockData';
 
 const MyTicketsScreen = ({ navigation }) => {
-  const { contracts, walletAddress, ethSigner } = useWeb3();
+  const { walletAddress } = useWeb3();
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
     loadTickets();
-  }, [contracts, walletAddress]);
+  }, [walletAddress]);
 
   // Load tickets when focusing the screen
   useEffect(() => {
@@ -25,49 +23,14 @@ const MyTicketsScreen = ({ navigation }) => {
   }, [navigation]);
 
   const loadTickets = async () => {
-    if (!contracts || !walletAddress) return;
-    
     try {
       setLoading(true);
       
-      // Get user tickets from the contract
-      const userTickets = await getUserTickets(contracts.userTicketHub, walletAddress);
+      // Simulate API call delay
+      await mockApiCall(null, 800);
       
-      // Get detailed information for each ticket
-      const ticketsWithDetails = await Promise.all(
-        userTickets.map(async (ticket) => {
-          try {
-            // Get event contract address
-            const eventAddress = await contracts.eventFactory.getEventContract(ticket.eventId);
-            
-            if (!eventAddress || eventAddress === ethers.constants.AddressZero) {
-              return null;
-            }
-            
-            // Get event details
-            const eventCoreContract = getEventCoreContract(eventAddress, ethSigner);
-            const details = await eventCoreContract.getEventDetails();
-            
-            // Get metadata
-            const metadata = await contracts.eventDiscovery.getEventMetadata(ticket.eventId);
-            
-            return {
-              eventId: ticket.eventId,
-              count: ticket.count,
-              name: details._name,
-              date: details._date.toString(),
-              location: metadata.location,
-              imageUrl: `https://ipfs.io/ipfs/${metadata.imageHash}`,
-            };
-          } catch (error) {
-            console.error(`Error loading ticket ${ticket.eventId}:`, error);
-            return null;
-          }
-        })
-      );
-      
-      // Filter out null tickets (errors)
-      setTickets(ticketsWithDetails.filter(ticket => ticket !== null));
+      // Use mock tickets
+      setTickets(MOCK_USER_TICKETS);
     } catch (error) {
       console.error('Error loading tickets:', error);
     } finally {
