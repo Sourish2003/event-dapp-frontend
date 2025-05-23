@@ -1,5 +1,6 @@
-import '@ethersproject/shims';
 import { getRandomValues as expoCryptoGetRandomValues } from 'expo-crypto';
+import '@ethersproject/shims';
+
 
 // Ensure crypto.getRandomValues is available
 if (typeof global.crypto !== 'object') {

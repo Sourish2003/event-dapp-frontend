@@ -1,24 +1,32 @@
+import { PRIVATE_KEY } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ethers } from 'ethers';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
+import { initializeEthers } from '../services/ethereum/setup';
+
+// ABI imports
 
 const Web3Context = createContext();
 
-// Mock wallet address and contracts for development
-const MOCK_WALLET_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
-const MOCK_CONTRACTS = {
-  userTicketHub: {},
-  eventFactory: {},
-  eventDiscovery: {},
+export const useWeb3 = () => {
+  const context = useContext(Web3Context);
+  if (!context) {
+    throw new Error('useWeb3 must be used within a Web3Provider');
+  }
+  return context;
 };
 
 export const Web3Provider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [contracts, setContracts] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [balance, setBalance] = useState('0');
 
-  // Initialize with mock data
+  // Initialize blockchain connection
   useEffect(() => {
     initializeBlockchain();
   }, []);
@@ -27,17 +35,19 @@ export const Web3Provider = ({ children }) => {
     try {
       setIsLoading(true);
       
-      // Check if user has a wallet
-      const walletInfo = await AsyncStorage.getItem('walletInfo');
+      const ethConnection = await initializeEthers();
       
-      if (walletInfo) {
-        // Set mock wallet address and contracts
-        setWalletAddress(MOCK_WALLET_ADDRESS);
-        setContracts(MOCK_CONTRACTS);
+      if (ethConnection.connected) {
+        setWalletAddress(ethConnection.address);
+        setProvider(ethConnection.provider);
+        setSigner(ethConnection.wallet);
+        setBalance(ethConnection.balance);
         setIsConnected(true);
+      } else {
+        console.error('Failed to initialize blockchain:', ethConnection.error);
       }
     } catch (error) {
-      console.log('Development mode: Using mock blockchain data');
+      console.error('Error initializing blockchain:', error);
     } finally {
       setIsLoading(false);
     }
@@ -45,17 +55,35 @@ export const Web3Provider = ({ children }) => {
 
   const connectWallet = async () => {
     try {
-      // Set mock wallet data
-      const mockWalletInfo = { address: MOCK_WALLET_ADDRESS };
-      await AsyncStorage.setItem('walletInfo', JSON.stringify(mockWalletInfo));
-      setWalletAddress(MOCK_WALLET_ADDRESS);
-      setContracts(MOCK_CONTRACTS);
-      setIsConnected(true);
+      setIsLoading(true);
+      
+      // Use the environment private key or create a new wallet
+      let wallet;
+      if (PRIVATE_KEY) {
+        const privateKey = PRIVATE_KEY.startsWith('0x') ? PRIVATE_KEY : `0x${PRIVATE_KEY}`;
+        wallet = new ethers.Wallet(privateKey);
+      } else {
+        wallet = ethers.Wallet.createRandom();
+      }
+      
+      const walletInfo = {
+        address: wallet.address,
+        privateKey: wallet.privateKey,
+      };
+      
+      // Store wallet info
+      await AsyncStorage.setItem('walletInfo', JSON.stringify(walletInfo));
+      
+      // Initialize connection with new wallet
+      await initializeBlockchain();
+      
       return true;
     } catch (error) {
       console.error('Error connecting wallet:', error);
       Alert.alert('Error', 'Failed to connect wallet');
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,8 +91,9 @@ export const Web3Provider = ({ children }) => {
     try {
       await AsyncStorage.removeItem('walletInfo');
       setWalletAddress(null);
-      setContracts(null);
+      setSigner(null);
       setIsConnected(false);
+      setBalance('0');
       return true;
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
@@ -73,23 +102,32 @@ export const Web3Provider = ({ children }) => {
     }
   };
 
-  // Simplified context value with only necessary mock data
+  const refreshBalance = async () => {
+    if (provider && walletAddress) {
+      try {
+        const balance = await provider.getBalance(walletAddress);
+        const formattedBalance = ethers.utils.formatEther(balance);
+        setBalance(formattedBalance);
+        return formattedBalance;
+      } catch (error) {
+        console.error('Error refreshing balance:', error);
+      }
+    }
+    return '0';
+  };
+
   const value = {
     walletAddress,
+    provider,
+    signer,
     contracts,
     isConnected,
     isLoading,
+    balance,
     connectWallet,
     disconnectWallet,
+    refreshBalance,
   };
 
   return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
-};
-
-export const useWeb3 = () => {
-  const context = useContext(Web3Context);
-  if (!context) {
-    throw new Error('useWeb3 must be used within a Web3Provider');
-  }
-  return context;
 };

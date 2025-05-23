@@ -1,5 +1,4 @@
-import { ETH_RPC_URL, SUI_RPC_URL } from '@env';
-import { JsonRpcProvider } from '@mysten/sui.js/client';
+import { SEPOLIA_RPC_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ethers } from 'ethers';
 
@@ -10,11 +9,9 @@ import EventFactoryABI from '../abis/EventFactory.json';
 import TicketManagerABI from '../abis/TicketManager.json';
 import UserTicketHubABI from '../abis/UserTicketHub.json';
 
-import { CONTRACT_EVENT_DISCOVERY, CONTRACT_EVENT_FACTORY, CONTRACT_USER_TICKET_HUB } from '@env';
-
 // Ethereum configuration
 export const getEthereumProvider = () => {
-  return new ethers.providers.JsonRpcProvider(ETH_RPC_URL);
+  return new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
 };
 
 export const getEthereumSigner = async (provider) => {
@@ -25,9 +22,9 @@ export const getEthereumSigner = async (provider) => {
 
 export const getContracts = (signer) => {
   return {
-    userTicketHub: new ethers.Contract(CONTRACT_USER_TICKET_HUB, UserTicketHubABI, signer),
-    eventFactory: new ethers.Contract(CONTRACT_EVENT_FACTORY, EventFactoryABI, signer),
-    eventDiscovery: new ethers.Contract(CONTRACT_EVENT_DISCOVERY, EventDiscoveryABI, signer),
+    userTicketHub: new ethers.Contract(process.env.CONTRACT_USER_TICKET_HUB, UserTicketHubABI, signer),
+    eventFactory: new ethers.Contract(process.env.CONTRACT_EVENT_FACTORY, EventFactoryABI, signer),
+    eventDiscovery: new ethers.Contract(process.env.CONTRACT_EVENT_DISCOVERY, EventDiscoveryABI, signer),
   };
 };
 
@@ -39,11 +36,6 @@ export const getEventCoreContract = (address, signer) => {
 // Get a TicketManager contract instance using its address
 export const getTicketManagerContract = (address, signer) => {
   return new ethers.Contract(address, TicketManagerABI, signer);
-};
-
-// Sui configuration
-export const getSuiProvider = () => {
-  return new JsonRpcProvider(SUI_RPC_URL);
 };
 
 // Store wallet information securely

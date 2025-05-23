@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
+import { PRIVATE_KEY, SEPOLIA_RPC_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ETH_RPC_URL } from '@env';
+import { ethers } from 'ethers';
 
 // Create a new random wallet
 export const createWallet = async () => {
@@ -81,7 +81,10 @@ export const getWallet = async () => {
     const walletInfo = await AsyncStorage.getItem('walletInfo');
     
     if (!walletInfo) {
-      return null;
+      // Use default private key from environment if no stored wallet
+      return {
+        privateKey: PRIVATE_KEY.startsWith('0x') ? PRIVATE_KEY : `0x${PRIVATE_KEY}`
+      };
     }
     
     return JSON.parse(walletInfo);
@@ -124,7 +127,7 @@ export const getSigner = async () => {
       throw new Error('No wallet found');
     }
     
-    const provider = new ethers.providers.JsonRpcProvider(ETH_RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
     const wallet = new ethers.Wallet(walletInfo.privateKey, provider);
     
     return wallet;
@@ -137,7 +140,7 @@ export const getSigner = async () => {
 // Get wallet balance
 export const getWalletBalance = async (address) => {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(ETH_RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
     const balance = await provider.getBalance(address);
     
     return ethers.utils.formatEther(balance);
