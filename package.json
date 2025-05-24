@@ -21,9 +21,6 @@
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.8",
     "@react-navigation/stack": "^7.3.1",
-    "@walletconnect/modal-react-native": "^1.1.0",
-    "@web3modal/react-native": "^1.0.0-alpha.7",
-    "@web3modal/wagmi": "^5.1.11",
     "axios": "^1.9.0",
     "buffer": "^6.0.3",
     "ethers": "^5.7.2",
@@ -57,9 +54,7 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "stream-browserify": "^3.0.0",
-    "text-encoding": "^0.7.0",
-    "viem": "^1.21.4",
-    "wagmi": "^1.4.13"
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

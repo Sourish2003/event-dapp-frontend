@@ -9,13 +9,6 @@ import EventFactoryABI from '../abis/EventFactory.json';
 import TicketManagerABI from '../abis/TicketManager.json';
 import UserTicketHubABI from '../abis/UserTicketHub.json';
 
-// Contract addresses on Sepolia testnet
-const CONTRACT_ADDRESSES = {
-  USER_TICKET_HUB: '0x...',  // Replace with deployed contract address
-  EVENT_FACTORY: '0x...',    // Replace with deployed contract address
-  EVENT_DISCOVERY: '0x...',  // Replace with deployed contract address
-};
-
 // Ethereum configuration
 export const getEthereumProvider = () => {
   return new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
@@ -29,9 +22,9 @@ export const getEthereumSigner = async (provider) => {
 
 export const getContracts = (signer) => {
   return {
-    userTicketHub: new ethers.Contract(CONTRACT_ADDRESSES.USER_TICKET_HUB, UserTicketHubABI, signer),
-    eventFactory: new ethers.Contract(CONTRACT_ADDRESSES.EVENT_FACTORY, EventFactoryABI, signer),
-    eventDiscovery: new ethers.Contract(CONTRACT_ADDRESSES.EVENT_DISCOVERY, EventDiscoveryABI, signer),
+    userTicketHub: new ethers.Contract(process.env.CONTRACT_USER_TICKET_HUB, UserTicketHubABI, signer),
+    eventFactory: new ethers.Contract(process.env.CONTRACT_EVENT_FACTORY, EventFactoryABI, signer),
+    eventDiscovery: new ethers.Contract(process.env.CONTRACT_EVENT_DISCOVERY, EventDiscoveryABI, signer),
   };
 };
 
