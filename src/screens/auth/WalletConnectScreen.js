@@ -1,47 +1,41 @@
-import { useState } from 'react';
-import { Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import Button from '../../components/common/Button';
+import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Loading from '../../components/common/Loading';
 import { useWeb3 } from '../../contexts/Web3Context';
 
 const WalletConnectScreen = () => {
-  const { connectWallet, isLoading } = useWeb3();
-  const [error, setError] = useState(null);
-
-  const handleConnect = async () => {
-    setError(null);
-    try {
-      const success = await connectWallet();
-      if (!success) {
-        setError('Failed to connect wallet. Please try again.');
-      }
-    } catch (e) {
-      setError('An error occurred while connecting. Please try again.');
-      console.error(e);
-    }
-  };
+  const { isConnected, isLoading, connectWallet } = useWeb3();
 
   if (isLoading) {
-    return <Loading message="Connecting wallet..." />;
+    return <Loading message="Connecting to MetaMask..." />;
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to EventApp</Text>        <Text style={styles.subtitle}>
-          Connect your wallet to start exploring events
+        <Text style={styles.title}>Welcome to EventApp</Text>
+        <Text style={styles.subtitle}>
+          Connect with MetaMask to start exploring events
         </Text>
         
         <Image
-          source={require('../../../assets/images/wallet-connect.png')}
+          source={require('../../../assets/images/metamask.png')}
           style={styles.image}
           resizeMode="contain"
-          accessibilityLabel="Wallet Connect Icon"
+          accessibilityLabel="MetaMask Logo"
         />
-        
-        <Button title="Connect Wallet" onPress={handleConnect} />
-        
-        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.connectButton}
+            onPress={connectWallet}
+          >
+            <Image
+              source={require('../../../assets/images/metamask-fox.png')}
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.buttonText}>Connect with MetaMask</Text>
+          </TouchableOpacity>
+        </View>
         
         <Text style={styles.disclaimer}>
           By connecting your wallet, you agree to our Terms of Service and Privacy Policy
@@ -79,15 +73,33 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 48,
   },
-  errorText: {
-    color: '#FF3B30',
-    marginTop: 16,
-    textAlign: 'center',
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  connectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6851B',
+    padding: 16,
+    borderRadius: 12,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  buttonIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
   disclaimer: {
     fontSize: 12,
     color: '#999',
-    marginTop: 24,
     textAlign: 'center',
   },
 });

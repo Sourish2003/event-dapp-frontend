@@ -1,17 +1,17 @@
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
 
 // Import screens
-import EventsScreen from '../screens/events/EventsScreen';
-import EventDetailsScreen from '../screens/events/EventDetailsScreen';
 import CreateEventScreen from '../screens/events/CreateEventScreen';
-import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
-import TransferTicketScreen from '../screens/tickets/TransferTicketScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
+import EventDetailsScreen from '../screens/events/EventDetailsScreen';
+import EventsScreen from '../screens/events/EventsScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import FavoriteEventsScreen from '../screens/profile/FavoriteEventsScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
+import TransferTicketScreen from '../screens/tickets/TransferTicketScreen';
 
 const Tab = createBottomTabNavigator();
 const EventsStack = createStackNavigator();
@@ -44,7 +44,7 @@ const TicketsStackNavigator = () => {
 const ProfileStackNavigator = () => {
   return (
     <ProfileStack.Navigator>
-      <ProfileStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'My Profile' }} />
+      <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} options={{ title: 'My Profile' }} />
       <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Edit Profile' }} />
       <ProfileStack.Screen name="FavoriteEvents" component={FavoriteEventsScreen} options={{ title: 'Favorite Events' }} />
       <ProfileStack.Screen name="EventDetails" component={EventDetailsScreen} options={{ title: 'Event Details' }} />
